@@ -13,14 +13,15 @@ namespace Roslyn.BuildSolution
 {
     class Program
     {
-        private const string Template_Folder_Path = @"C:\Users\karthikn\Desktop\Templates\";
+        private const string Template_Folder_Path = @"C:\Users\karthikn\Source\repos\Roslyn.BuildSolution\Roslyn.BuildSolution\Templates\";
+        private const string New_Projects_Repository = @"C:\Users\karthikn\Desktop\TestSolutions\";
+
+
         private const string Template_Name = "WebApiTemplate";
 
         private const string Template_Models_Folder_name = "Models";
         private const string Template_Cotrollers_Folder_Name = "Controllers";
         private const string Template_Controller_Filename = "ValuesController.cs";
-
-        private const string New_Projects_Repository = @"C:\Users\karthikn\Desktop\TestSolutions\";
 
         static void Main(string[] args)
         {
@@ -48,6 +49,8 @@ namespace Roslyn.BuildSolution
             CreateModelClassForEntity(newWorkSpacePath, projectName, entityName, obj);
 
             CreateController(newWorkSpacePath, projectName, entityName, obj);
+            Console.WriteLine("Updated Project files successfully as per the Entity provided");
+
 
             Console.ReadLine();
         }
@@ -129,7 +132,7 @@ namespace Roslyn.BuildSolution
             // Write the new file.
             File.WriteAllText(filePath, root.ToFullString());
 
-            // Output new code to the console.
+            //Output new code to the console.
             //Console.WriteLine(newCode);
             //Console.WriteLine("Namespace replaced...");
         }
