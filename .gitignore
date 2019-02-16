@@ -263,5 +263,5 @@ __pycache__/
 # exclude Test solutions
 TestSolutions/*
 
-# exception to the rule
+# exception to the above rule
 !TestSolutions/ gitkeep.txt
