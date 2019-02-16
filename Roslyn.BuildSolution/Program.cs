@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Roslyn.BuildSolution.SyntaxCreator;
 
@@ -13,11 +14,13 @@ namespace Roslyn.BuildSolution
 {
     class Program
     {
-        private const string Template_Folder_Path = @"C:\Users\karthikn\Source\repos\Roslyn.BuildSolution\Roslyn.BuildSolution\Templates\";
-        private const string New_Projects_Repository = @"C:\Users\karthikn\Desktop\TestSolutions\";
+        private const string Powershell_Command = @"Powershell .\DeployApi.ps1 -app {0} -image {1} -container {2} -port {3} -path {4}";
+
+        private const string Template_Folder_Path = @"..\..\..\Templates\";
+        private const string New_Projects_Repository = @"..\..\..\TestSolutions\";
 
 
-        private const string Template_Name = "WebApiTemplate";
+        private const string Template_Name = "WebApiTemplate_Core_2_2";
 
         private const string Template_Models_Folder_name = "Models";
         private const string Template_Cotrollers_Folder_Name = "Controllers";
@@ -25,6 +28,10 @@ namespace Roslyn.BuildSolution
 
         static void Main(string[] args)
         {
+            //ExecuteCommand(@"Powershell C:\Users\karthikn\Downloads\convert\2ASCII.ps1 -infile Quoter.txt");
+            //ExecuteCommand(@"Powershell .\DeployApi.ps1 -app Customer.Api.dll -image customer:dev -container customerservice -port 5008:80 -path C:\Users\karthikn\Desktop\TestSolutions\Customer.Api");
+            //Console.ReadLine();
+
             Console.WriteLine("Please provide the Entity name for which the API to be created");
             string entityName = Console.ReadLine();
             string projectName = GetValidFilename(entityName) + ".Api";
@@ -50,9 +57,50 @@ namespace Roslyn.BuildSolution
 
             CreateController(newWorkSpacePath, projectName, entityName, obj);
             Console.WriteLine("Updated Project files successfully as per the Entity provided");
+            Console.WriteLine("");
 
+            Console.WriteLine("Do you want to build and publish this API, If yes ensure DOcker with Windows is available ? (Y/N)");
+            string consent = Console.ReadLine();
+            if (consent.ToLower() == "y")
+            {
+                string imageName = entityName + ":dev";
+                string containerName = entityName + "service";
+                string appExe = projectName + ".dll";
+                Console.WriteLine("Please provide the host port to use to map with http port inside docker ");
+                string hostPort = Console.ReadLine();
 
+                if(ExecuteCommand(string.Format(Powershell_Command, appExe, imageName.ToLower(), containerName.ToLower(), hostPort + ":80", newWorkSpacePath)))
+                {
+                    Console.WriteLine("Try accessing the Get Api at http://localhost:{0}/api/{1}", hostPort, entityName + "s");
+                }
+            }
             Console.ReadLine();
+        }
+
+        static bool ExecuteCommand(string command)
+        {
+            bool commandExecuted = false;
+            using (var ps = PowerShell.Create())
+            {
+                ps.Streams.Progress.DataAdded += Progress_DataAdded;
+                var results = ps.AddScript(command).Invoke();
+                foreach (var result in results)
+                {
+                    Console.WriteLine(result.ToString());
+                }
+                ps.Streams.Progress.DataAdded -= Progress_DataAdded;
+                commandExecuted = results != null && results.Count > 0;
+            }
+            return commandExecuted;
+        }
+
+        private static void Progress_DataAdded(object sender, DataAddedEventArgs e)
+        {
+            ProgressRecord newRecord = ((PSDataCollection<ProgressRecord>)sender)[e.Index];
+            if (newRecord.PercentComplete != -1)
+            {
+                Console.WriteLine("Progress updated: {0}", newRecord.PercentComplete);
+            }
         }
 
         #region "Copy and Create Project based on template"
@@ -163,13 +211,6 @@ namespace Roslyn.BuildSolution
 
             File.WriteAllText(filePath, code);
         }
-
-        #endregion
-
-        #region "Build Syntax nodes"
-
-        
-
 
         #endregion
 

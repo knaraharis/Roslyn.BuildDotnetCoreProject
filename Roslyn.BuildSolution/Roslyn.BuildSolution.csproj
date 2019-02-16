@@ -7,8 +7,11 @@
 
   <ItemGroup>
     <Compile Remove="Templates\**" />
+    <Compile Remove="TestSolutions\**" />
     <EmbeddedResource Remove="Templates\**" />
+    <EmbeddedResource Remove="TestSolutions\**" />
     <None Remove="Templates\**" />
+    <None Remove="TestSolutions\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +20,12 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="6.1.2" />
     <PackageReference Include="Microsoft.WSMan.Management" Version="6.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DeployApi.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
