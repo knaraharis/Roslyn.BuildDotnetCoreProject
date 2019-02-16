@@ -261,7 +261,7 @@ __pycache__/
 *.pyc
 
 # exclude Test solutions
-TestSolutions/*
+Roslyn.BuildSolution/TestSolutions/*
 
 # exception to the above rule
-!TestSolutions/ gitkeep.txt
+!Roslyn.BuildSolution/TestSolutions/ gitkeep.txt
