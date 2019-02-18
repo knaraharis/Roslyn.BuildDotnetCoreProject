@@ -18,6 +18,9 @@ namespace Roslyn.BuildSolution
         private const string Docker_Build_Command = @"docker build --tag {0} {1}";
         private const string Docker_Run_Command = @"docker run -d -p {0} --name {1} --entrypoint 'dotnet' {2} {3}";
 
+        private const string Dotnet_Build_Command = @"dotnet build {0}";
+        private const string Dotnet_Run_Command = @"dotnet run --project {0}";
+
         private const string Template_Folder_Path = @"Templates\";
         private const string New_Projects_Repository = @"TestSolutions\";
 
@@ -64,9 +67,9 @@ namespace Roslyn.BuildSolution
             Console.WriteLine("Updated Project files successfully as per the Entity provided");
             Console.WriteLine("");
 
-            Console.WriteLine("Do you want to build and publish this API, If yes ensure DOcker with Windows is available ? (Y/N)");
+            Console.WriteLine("To just build and publish API Type b, TO spin docker container and publish, Type d.... (b/d) ?");
             string consent = Console.ReadLine();
-            if (consent.ToLower() == "y")
+            if (consent.ToLower() == "d")
             {
                 string imageName = entityName + ":dev";
                 string containerName = entityName + "service";
@@ -100,6 +103,24 @@ namespace Roslyn.BuildSolution
                 {
                     Console.WriteLine("Unable to create or deploy DOcker container");
                 }
+            }
+            else
+            {
+                string appExe = projectName + ".csproj";
+
+                string buildCommand = string.Format(Dotnet_Build_Command, Path.Combine(newWorkSpacePath, appExe));
+                Console.WriteLine(buildCommand);
+                bool buildProject = ExecuteCommand(buildCommand);
+
+                string runCommand = string.Format(Dotnet_Run_Command, Path.Combine(newWorkSpacePath, appExe));
+                Console.WriteLine(runCommand);
+                bool runProject = ExecuteCommand(runCommand);
+
+                if(!(buildProject && runProject))
+                {
+                    Console.WriteLine("Something bad happened, Try again");
+                }
+
             }
             Console.ReadLine();
         }
