@@ -15,9 +15,11 @@ namespace Roslyn.BuildSolution
     class Program
     {
         private const string Powershell_Command = @"Powershell .\DeployApi.ps1 -app {0} -image {1} -container {2} -port {3} -path {4}";
+        private const string Docker_Build_Command = @"docker build --tag {0} {1}";
+        private const string Docker_Run_Command = @"docker run -d -p {0} --name {1} --entrypoint 'dotnet' {2} {3}";
 
-        private const string Template_Folder_Path = @"..\..\..\Templates\";
-        private const string New_Projects_Repository = @"..\..\..\TestSolutions\";
+        private const string Template_Folder_Path = @"Templates\";
+        private const string New_Projects_Repository = @"TestSolutions\";
 
 
         private const string Template_Name = "WebApiTemplate_Core_2_2";
@@ -28,10 +30,13 @@ namespace Roslyn.BuildSolution
 
         static void Main(string[] args)
         {
-            //ExecuteCommand(@"Powershell C:\Users\karthikn\Downloads\convert\2ASCII.ps1 -infile Quoter.txt");
-            //ExecuteCommand(@"Powershell .\DeployApi.ps1 -app Customer.Api.dll -image customer:dev -container customerservice -port 5008:80 -path C:\Users\karthikn\Desktop\TestSolutions\Customer.Api");
-            //Console.ReadLine();
-
+            //ExecuteCommand(@"cd TestSolutions\Employee.Api");
+            //ExecuteCommand(@"docker build --tag employee:dev TestSolutions\Employee.Api");
+            //ExecuteCommand(@"docker run -d -p 5006:80 --name employeeapi --entrypoint 'dotnet' employee:dev EMployee.Api.dll");
+            //if (Console.ReadLine() == "n")
+            //{
+            //    return;
+            //}
             Console.WriteLine("Please provide the Entity name for which the API to be created");
             string entityName = Console.ReadLine();
             string projectName = GetValidFilename(entityName) + ".Api";
@@ -69,9 +74,31 @@ namespace Roslyn.BuildSolution
                 Console.WriteLine("Please provide the host port to use to map with http port inside docker ");
                 string hostPort = Console.ReadLine();
 
-                if(ExecuteCommand(string.Format(Powershell_Command, appExe, imageName.ToLower(), containerName.ToLower(), hostPort + ":80", newWorkSpacePath)))
+                ////if(ExecuteCommand(string.Format(Powershell_Command, appExe, imageName.ToLower(), containerName.ToLower(), hostPort + ":80", newWorkSpacePath)))
+                ////{
+                ////    Console.WriteLine("Try accessing the Get Api at http://localhost:{0}/api/{1}", hostPort, entityName + "s");
+                ////}
+                string buildCommand = string.Format(Docker_Build_Command, imageName.ToLower(), newWorkSpacePath);
+                Console.WriteLine(buildCommand);
+                bool isDockerBuild = ExecuteCommand(buildCommand);
+                if (isDockerBuild)
+                    Console.WriteLine("Docker image built successfully");
+
+                Console.WriteLine("");
+                
+                string runCommand = string.Format(Docker_Run_Command, hostPort + ":80", containerName.ToLower(), imageName.ToLower(), appExe);
+                Console.WriteLine(runCommand);
+                bool runDockerContainer = ExecuteCommand(runCommand);
+                if (runDockerContainer)
+                    Console.WriteLine("Docker container started successfully");
+
+                if(isDockerBuild && runDockerContainer)
                 {
                     Console.WriteLine("Try accessing the Get Api at http://localhost:{0}/api/{1}", hostPort, entityName + "s");
+                }
+                else
+                {
+                    Console.WriteLine("Unable to create or deploy DOcker container");
                 }
             }
             Console.ReadLine();
