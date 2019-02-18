@@ -21,8 +21,8 @@ namespace Roslyn.BuildSolution
         private const string Dotnet_Build_Command = @"dotnet build {0}";
         private const string Dotnet_Run_Command = @"dotnet run --project {0}";
 
-        private const string Template_Folder_Path = @"Templates\";
-        private const string New_Projects_Repository = @"TestSolutions\";
+        private const string Template_Folder_Path = @"Templates";
+        private const string New_Projects_Repository = @"TestSolutions";
 
 
         private const string Template_Name = "WebApiTemplate_Core_2_2";
